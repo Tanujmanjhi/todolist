@@ -1,0 +1,41 @@
+body {
+  padding: 30px;
+  font-family: Arial, sans-serif;
+}
+h1 {
+  text-align: center;
+}
+.inputForm {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+input {
+  padding: 7px;
+  margin-right: 10px;
+  width: 200px;
+}
+button {
+  padding: 7px 15px;
+  cursor: pointer;
+}
+.todoList {
+  list-style: none;
+  width: 300px;
+  margin: auto;
+  padding: 0;
+}
+.todo {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  padding: 7px;
+  border-bottom: 1px solid #ddd;
+}
+.todo.done span {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.delete {
+  color: red;
+}

@@ -1,0 +1,8 @@
+<li class="todo <%= todo.completed ? 'done' : '' %>">
+  <span><%= todo.text %></span>
+
+  <div>
+    <a href="/toggle/<%= todo._id %>">Toggle</a>
+    <a href="/delete/<%= todo._id %>" class="delete">Delete</a>
+  </div>
+</li>

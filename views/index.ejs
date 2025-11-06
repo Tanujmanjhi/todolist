@@ -1,0 +1,22 @@
+<h1>✅ Todo List (EJS)</h1>
+
+<form action="/api/todos" method="POST">
+  <input type="text" name="text" placeholder="Add todo">
+  <button type="submit">Add</button>
+</form>
+
+<ul>
+  <% todos.forEach(todo => { %>
+    <li>
+      <%= todo.text %> - <%= todo.completed ? "✅" : "❌" %>
+
+      <form action="/api/todos/<%= todo._id %>?_method=PUT" method="POST">
+        <button type="submit">Toggle</button>
+      </form>
+
+      <form action="/api/todos/<%= todo._id %>?_method=DELETE" method="POST">
+        <button type="submit">Delete</button>
+      </form>
+    </li>
+  <% }) %>
+</ul>
