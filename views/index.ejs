@@ -1,22 +1,125 @@
-<h1>✅ Todo List (EJS)</h1>
 
-<form action="/api/todos" method="POST">
-  <input type="text" name="text" placeholder="Add todo">
+
+<h1>✅ Todo List (EJS)</h1>
+<button id="themeSwitch">Toggle Theme</button>
+
+<h3>
+  Total Tasks: <%= total %> |
+  Completed: <%= completed %>
+</h3>
+
+<!-- ✅ Filter Buttons -->
+<div class="filters">
+  <a href="/">All</a>
+  <a href="/?filter=completed">Completed</a>
+  <a href="/?filter=pending">Pending</a>
+  <a href="/?filter=high">High Priority</a>
+</div>
+
+<!-- ✅ Sort Buttons -->
+<div class="filters">
+  <a href="/?sort=newest">Newest</a>
+  <a href="/?sort=oldest">Oldest</a>
+  <a href="/?sort=priority">Priority</a>
+  <a href="/?sort=due">Due Soon</a>
+</div>
+
+<!-- ✅ Pagination -->
+<div class="pagination">
+  <% if (page > 1) { %>
+    <a href="/?page=<%= page - 1 %>">Prev</a>
+  <% } %>
+
+  Page <%= page %> of <%= totalPages %>
+
+  <% if (page < totalPages) { %>
+    <a href="/?page=<%= page + 1 %>">Next</a>
+  <% } %>
+</div>
+
+<!-- ✅ Search -->
+<form method="GET" action="/" class="searchForm">
+  <input type="search" name="search" placeholder="Search..." />
+  <button>Search</button>
+</form>
+
+<!-- ✅ Validation messages -->
+<% if (req.query.error === "empty") { %>
+<p style="color:red;">Todo cannot be empty!</p>
+<% } %>
+<% if (req.query.error === "short") { %>
+<p style="color:red;">Todo is too short (min 3 chars)</p>
+<% } %>
+<% if (req.query.error === "long") { %>
+<p style="color:red;">Todo is too long (max 50 chars)</p>
+<% } %>
+
+<!-- ✅ Add Todo Form -->
+<form action="/add" method="POST" class="inputForm">
+  <input type="text" name="text" placeholder="Add task..." required />
+  <input type="date" name="dueDate" />
+
+  <select name="priority">
+    <option value="Low">Low</option>
+    <option value="Medium">Medium</option>
+    <option value="High">High</option>
+  </select>
+
+  <select name="category">
+    <option value="Work">Work</option>
+    <option value="Home">Home</option>
+    <option value="Important">Important</option>
+  </select>
+
   <button type="submit">Add</button>
 </form>
 
-<ul>
+<!-- ✅ Todo List -->
+<ul class="todoList">
   <% todos.forEach(todo => { %>
-    <li>
-      <%= todo.text %> - <%= todo.completed ? "✅" : "❌" %>
+  <li class="todo <%= todo.completed ? 'done' : '' %> <%= todo.priority.toLowerCase() %>">
+    <span>
+      <strong>Task:</strong> <%= todo.text %><br/>
 
-      <form action="/api/todos/<%= todo._id %>?_method=PUT" method="POST">
-        <button type="submit">Toggle</button>
-      </form>
+      <% if (todo.dueDate) { %>
+        <strong>Due:</strong> <%= new Date(todo.dueDate).toLocaleDateString() %><br/>
+      <% } %>
 
-      <form action="/api/todos/<%= todo._id %>?_method=DELETE" method="POST">
-        <button type="submit">Delete</button>
-      </form>
-    </li>
+      <strong>Priority:</strong> <%= todo.priority %><br/>
+      <strong>Category:</strong> <%= todo.category %><br/>
+
+      <strong>Status:</strong>
+      <%= todo.completed ? "✅ Completed" : "❌ Pending" %>
+
+      <% if (todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.completed) { %>
+        <span style="color:red;">⚠ Overdue</span>
+      <% } %>
+    </span>
+
+    <form action="/toggle/<%= todo._id %>?_method=PUT" method="POST" style="display:inline;">
+      <button type="submit">Toggle</button>
+    </form>
+
+    <form action="/delete/<%= todo._id %>?_method=DELETE" method="POST" style="display:inline;">
+      <button type="submit">Delete</button>
+    </form>
+
+    <form action="/update/<%= todo._id %>?_method=PUT" method="POST" style="display:inline;">
+      <input type="text" name="text" value="<%= todo.text %>" />
+      <button type="submit">Update</button>
+    </form>
+  </li>
   <% }) %>
 </ul>
+
+<!-- ✅ Theme Toggle -->
+<script>
+document.querySelector("#themeSwitch").onclick = () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme", document.body.classList.contains("dark"));
+};
+
+if (localStorage.getItem("theme") === "true") {
+  document.body.classList.add("dark");
+}
+</script>

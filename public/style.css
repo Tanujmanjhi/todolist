@@ -1,7 +1,17 @@
 body {
   padding: 30px;
   font-family: Arial, sans-serif;
+  animation: changeBg 100s infinite alternate;
 }
+
+@keyframes changeBg {
+  0% { background-color: #1e7fd3; }
+  25% { background-color: #a18480; }
+  50% { background-color: #e6e64e; }
+  75% { background-color: #129f7e; }
+  100% { background-color: #801354; }
+}
+
 h1 {
   text-align: center;
 }
@@ -31,6 +41,7 @@ button {
   margin: 8px 0;
   padding: 7px;
   border-bottom: 1px solid #ddd;
+  transition: background 0.5s ease;
 }
 .todo.done span {
   text-decoration: line-through;
@@ -39,3 +50,35 @@ button {
 .delete {
   color: red;
 }
+
+.pagination {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.pagination a {
+  margin: 0 10px;
+  text-decoration: none;
+  background: #222;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+.dark {
+  background: #121212;
+  color: #fff;
+}
+
+.dark button {
+  background: #444;
+  color: #fff;
+}
+
+.dark input, .dark select {
+  background: #333;
+  color: #fff;
+  border: 1px solid #666;
+}
+
+
+
