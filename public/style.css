@@ -1,40 +1,48 @@
+@keyframes changeBg {
+  0%   { background-color: #E3F2FD; } /* pastel baby blue */
+  25%  { background-color: #FFF9C4; } /* soft yellow */
+  50%  { background-color: #FCE4EC; } /* very light pink */
+  75%  { background-color: #E8F5E9; } /* mint green */
+  100% { background-color: #F3E5F5; } /* soft lavender */
+}
+
+
 body {
   padding: 30px;
   font-family: Arial, sans-serif;
   animation: changeBg 100s infinite alternate;
+  transition: 0.3s;
 }
 
-@keyframes changeBg {
-  0% { background-color: #1e7fd3; }
-  25% { background-color: #a18480; }
-  50% { background-color: #e6e64e; }
-  75% { background-color: #129f7e; }
-  100% { background-color: #801354; }
-}
 
 h1 {
   text-align: center;
 }
+
 .inputForm {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
 }
+
 input {
   padding: 7px;
   margin-right: 10px;
   width: 200px;
 }
+
 button {
   padding: 7px 15px;
   cursor: pointer;
 }
+
 .todoList {
   list-style: none;
   width: 300px;
   margin: auto;
   padding: 0;
 }
+
 .todo {
   display: flex;
   justify-content: space-between;
@@ -43,10 +51,12 @@ button {
   border-bottom: 1px solid #ddd;
   transition: background 0.5s ease;
 }
+
 .todo.done span {
   text-decoration: line-through;
   opacity: 0.6;
 }
+
 .delete {
   color: red;
 }
@@ -64,21 +74,42 @@ button {
   padding: 5px 10px;
   border-radius: 5px;
 }
-.dark {
-  background: #121212;
-  color: #fff;
+
+/* ✅ DARK MODE FIX */
+/* 🌙 DARK MODE */
+@keyframes darkGradient {
+  0%   { background-color: #0F111A; }   /* deep navy */
+  25%  { background-color: #12141F; }   /* soft midnight */
+  50%  { background-color: #151823; }   /* cool gray-blue */
+  75%  { background-color: #1A1C26; }   /* darker slate */
+  100% { background-color: #0F111A; }   /* return */
 }
 
-.dark button {
+body.dark {
+  animation: darkGradient 18s infinite alternate ease-in-out !important;
+  color: #E5E7EB !important;
+}
+
+
+
+body.dark .todo {
+  background: #1e1e1e;
+  border-bottom: 1px solid #444;
+}
+
+body.dark button {
   background: #444;
   color: #fff;
 }
 
-.dark input, .dark select {
-  background: #333;
+body.dark input,
+body.dark select {
+  background: #222;
   color: #fff;
-  border: 1px solid #666;
+  border: 1px solid #555;
 }
 
-
-
+body.dark .pagination a {
+  background: #555;
+  color: #fff;
+}
