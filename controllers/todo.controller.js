@@ -1,112 +1,74 @@
 const Todo = require("../models/Todo");
 
 // GET UI + Todos
-// GET UI + Todos
-// GET UI + Todos
 exports.renderTodos = async (req, res) => {
   try {
-    const filter = req.query.filter;
-    const sort = req.query.sort;
-    const search = req.query.search;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // tasks per page
+    const skip = (page - 1) * limit;
 
-    const page = parseInt(req.query.page) || 1; // ✅ new
-    const limit = 5; // ✅ show 5 per page
-
+    // Build query based on filters
     let query = {};
-    let sortOption = { createdAt: -1 };
 
-    // ✅ Filter
-    if (filter === "completed") query.completed = true;
-    if (filter === "pending") query.completed = false;
-    if (filter === "high") query.priority = "High";
+    if (req.query.filter) {
+      switch (req.query.filter) {
+        case "completed":
+          query.completed = true;
+          break;
+        case "pending":
+          query.completed = false;
+          break;
+        case "high":
+          query.priority = "High";
+          break;
+      }
+    }
 
-    // ✅ Search
-    if (search) query.text = { $regex: search, $options: "i" };
+    // Search
+    if (req.query.search) {
+      query.text = { $regex: req.query.search, $options: "i" };
+    }
 
-    // ✅ Sorting
-    if (sort === "newest") sortOption = { createdAt: -1 };
-    if (sort === "oldest") sortOption = { createdAt: 1 };
-    if (sort === "priority") sortOption = { priority: -1 };
-    if (sort === "due") sortOption = { dueDate: 1 };
-
-    const todos = await Todo.find(query)
-      .sort(sortOption)
-      .skip((page - 1) * limit)   // ✅ new
-      .limit(limit);              // ✅ new
-
+    // Count total for pagination
     const total = await Todo.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
+    // Fetch todos
+    let todos = await Todo.find(query)
+      .sort(getSortOption(req.query.sort))
+      .skip(skip)
+      .limit(limit);
+
+    // Completed count
+    const completed = await Todo.countDocuments({ ...query, completed: true });
+
     res.render("index", {
       todos,
-      req,
+      total,
+      completed,
       page,
-      totalPages
+      totalPages,
+      req
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).send("Server Error");
   }
 };
 
-
-
-// POST Create Todo
-exports.createTodo = async (req, res) => {
-  try {
-    const text = req.body.text.trim();
-    const dueDate = req.body.dueDate || null;
-    const priority = req.body.priority || "Low";
-
-    // Validation
-    if (!text || text === "") return res.redirect("/?error=empty");
-    if (text.length < 3) return res.redirect("/?error=short");
-    if (text.length > 50) return res.redirect("/?error=long");
-
-    await Todo.create({ text, dueDate, priority });
-    res.redirect("/");
-  } catch (err) {
-    res.status(400).send("Invalid Data");
+// Helper function
+function getSortOption(sort) {
+  switch (sort) {
+    case "newest":
+      return { createdAt: -1 };
+    case "oldest":
+      return { createdAt: 1 };
+    case "priority":
+      return { priority: -1 };
+    case "due":
+      return { dueDate: 1 };
+    default:
+      return { createdAt: -1 };
   }
-};
-
-// PUT / Toggle Todo
-exports.toggleTodo = async (req, res) => {
-  try {
-    const todo = await Todo.findById(req.params.id);
-    todo.completed = !todo.completed;
-    await todo.save();
-    res.redirect("/");
-  } catch (err) {
-    res.status(404).send("Not Found");
-  }
-};
-
-// UPDATE Todo
-exports.updateTodo = async (req, res) => {
-  try {
-    const text = req.body.text.trim();
-    const dueDate = req.body.dueDate || null;
-    const priority = req.body.priority || "Low";
-
-    // Validation
-    if (!text || text === "") return res.redirect("/?error=empty");
-    if (text.length < 3) return res.redirect("/?error=short");
-    if (text.length > 50) return res.redirect("/?error=long");
-
-    await Todo.findByIdAndUpdate(req.params.id, { text, dueDate, priority });
-    res.redirect("/");
-  } catch (err) {
-    res.status(400).send("Unable to update");
-  }
-};
-
-// DELETE Todo
-exports.deleteTodo = async (req, res) => {
-  try {
-    await Todo.findByIdAndDelete(req.params.id);
-    res.redirect("/");
-  } catch (err) {
-    res.status(404).send("Not Found");
-  }
-};
+}

@@ -1,126 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Task Master Pro</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/animations.css">
+</head>
+<body class="animated-bg">
+    <!-- Dynamic Welcome Header -->
+    <header class="app-header glass floating">
+        <div class="header-content">
+            <div class="brand">
+                <h1>✨ Task Master Pro</h1>
+                <p class="subtitle"><%= new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) %></p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card glass">
+                    <span class="stat-icon">📝</span>
+                    <span class="stat-label">Total</span>
+                    <span class="stat-value"><%= total %></span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-icon">✅</span>
+                    <span class="stat-label">Done</span>
+                    <span class="stat-value"><%= completed %></span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-icon">⏳</span>
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value"><%= total - completed %></span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="themeSwitch" class="theme-btn ripple" aria-label="Toggle theme">🌙</button>
+    </header>
 
+    <main class="container">
+        <!-- Smart Action Bar -->
+        <nav class="action-bar glass floating">
+            <div class="search-wrapper glass">
+                <form method="GET" action="/" class="smart-search">
+                    <input type="search" name="search" 
+                           placeholder="Search tasks..."
+                           value="<%= req.query.search || '' %>"
+                           autocomplete="off"
+                    />
+                    <button type="submit" class="icon-btn">🔍</button>
+                </form>
+            </div>
 
-<h1>✅ Todo List (EJS)</h1>
+            <div class="view-controls">
+                <div class="btn-group glass">
+                    <a href="/" class="btn <%= !req.query.filter ? 'active' : '' %>">
+                        <span class="btn-icon">📋</span> All
+                    </a>
+                    <a href="/?filter=completed" class="btn <%= req.query.filter === 'completed' ? 'active' : '' %>">
+                        <span class="btn-icon">✅</span> Done
+                    </a>
+                    <a href="/?filter=pending" class="btn <%= req.query.filter === 'pending' ? 'active' : '' %>">
+                        <span class="btn-icon">⏳</span> Pending
+                    </a>
+                    <a href="/?filter=high" class="btn <%= req.query.filter === 'high' ? 'active' : '' %>">
+                        <span class="btn-icon">🔴</span> High Priority
+                    </a>
+                </div>
 
+                <div class="btn-group glass">
+                    <a href="/?sort=newest" class="btn <%= req.query.sort === 'newest' ? 'active' : '' %>">
+                        <span class="btn-icon">🆕</span> Newest
+                    </a>
+                    <a href="/?sort=priority" class="btn <%= req.query.sort === 'priority' ? 'active' : '' %>">
+                        <span class="btn-icon">⭐</span> Priority
+                    </a>
+                    <a href="/?sort=due" class="btn <%= req.query.sort === 'due' ? 'active' : '' %>">
+                        <span class="btn-icon">📅</span> Due Soon
+                    </a>
+                </div>
+            </div>
+        </nav>
 
-<h3>
-  Total Tasks: <%= total %> |
-  Completed: <%= completed %>
-</h3>
+        <!-- Quick Add Task -->
+        <section class="quick-add glass floating">
+            <form action="/add" method="POST" class="smart-form">
+                <div class="form-grid">
+                    <input type="text" name="text" 
+                           placeholder="+ Add a new task..." 
+                           required minlength="3" maxlength="50"
+                           class="task-input glass"
+                    />
+                    
+                    <input type="date" name="dueDate" 
+                           class="date-input glass"
+                           min="<%= new Date().toISOString().split('T')[0] %>"
+                    />
+                    
+                    <select name="priority" class="priority-select glass">
+                        <option value="Low">🟢 Low</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="High">🔴 High</option>
+                    </select>
 
-<!-- ✅ Filter Buttons -->
-<div class="filters">
-  <a href="/">All</a>
-  <a href="/?filter=completed">Completed</a>
-  <a href="/?filter=pending">Pending</a>
-  <a href="/?filter=high">High Priority</a>
-</div>
+                    <select name="category" class="category-select glass">
+                        <option value="Work">💼 Work</option>
+                        <option value="Home">🏠 Home</option>
+                        <option value="Important">⭐ Important</option>
+                    </select>
 
-<!-- ✅ Sort Buttons -->
-<div class="filters">
-  <a href="/?sort=newest">Newest</a>
-  <a href="/?sort=oldest">Oldest</a>
-  <a href="/?sort=priority">Priority</a>
-  <a href="/?sort=due">Due Soon</a>
-</div>
+                    <button type="submit" class="submit-btn glass">
+                        Add Task ✨
+                    </button>
+                </div>
+            </form>
 
-<!-- ✅ Pagination -->
-<!-- ✅ Pagination -->
-<div class="pagination">
-  <% if (page > 1) { %>
-    <a href="/?page=<%= page - 1 %>">Prev</a>
-  <% } %>
+            <% if (req.query.error) { %>
+                <div class="alert alert-error glass fade-in">
+                    <span class="alert-icon">⚠️</span>
+                    <%= {
+                        empty: "Task cannot be empty!",
+                        short: "Task needs at least 3 characters",
+                        long: "Task is too detailed (max 50 chars)"
+                    }[req.query.error] %>
+                </div>
+            <% } %>
+        </section>
 
-  Page <%= page %> of <%= totalPages %>
+        <!-- Task List -->
+        <section class="tasks-wrapper">
+            <ul class="task-grid">
+                <% todos.forEach(todo => { %>
+                <li class="task-card glass <%= todo.completed ? 'completed' : '' %> 
+                           priority-<%= todo.priority.toLowerCase() %> animate-in">
+                    <div class="task-header">
+                        <h3 class="task-title"><%= todo.text %></h3>
+                        <div class="task-badges">
+                            <span class="badge <%= todo.priority.toLowerCase() %>">
+                                <%= ['🔴', '🟡', '🟢'][['High', 'Medium', 'Low'].indexOf(todo.priority)] %>
+                            </span>
+                            <span class="badge category">
+                                <%= {'Work': '💼', 'Home': '🏠', 'Important': '⭐'}[todo.category] %>
+                            </span>
+                        </div>
+                    </div>
 
-  <% if (page < totalPages) { %>
-    <a href="/?page=<%= page + 1 %>">Next</a>
-  <% } %>
-</div>
+                    <div class="task-details">
+                        <% if (todo.dueDate) { %>
+                            <time class="due-date <%= new Date(todo.dueDate) < new Date() && !todo.completed ? 'overdue' : '' %>">
+                                📅 <%= new Date(todo.dueDate).toLocaleDateString() %>
+                            </time>
+                        <% } %>
+                        
+                        <span class="status <%= todo.completed ? 'done' : 'pending' %>">
+                            <%= todo.completed ? "✅ Completed" : "⏳ In Progress" %>
+                        </span>
+                    </div>
 
-<!-- ✅ Search -->
-<form method="GET" action="/" class="searchForm">
-  <input type="search" name="search" placeholder="Search..." />
-  <button>Search</button>
-</form>
+                    <div class="task-actions">
+                        <form action="/toggle/<%= todo._id %>?_method=PUT" method="POST" class="action-form">
+                            <button type="submit" class="icon-btn toggle">
+                                <%= todo.completed ? '↩️' : '✅' %>
+                            </button>
+                        </form>
 
-<!-- ✅ Validation messages -->
-<% if (req.query.error === "empty") { %>
-<p style="color:red;">Todo cannot be empty!</p>
-<% } %>
-<% if (req.query.error === "short") { %>
-<p style="color:red;">Todo is too short (min 3 chars)</p>
-<% } %>
-<% if (req.query.error === "long") { %>
-<p style="color:red;">Todo is too long (max 50 chars)</p>
-<% } %>
+                        <form action="/update/<%= todo._id %>?_method=PUT" method="POST" class="action-form edit">
+                            <input type="text" name="text" value="<%= todo.text %>" class="edit-input glass" />
+                            <button type="submit" class="icon-btn update">✏️</button>
+                        </form>
 
-<!-- ✅ Add Todo Form -->
-<form action="/add" method="POST" class="inputForm">
-  <input type="text" name="text" placeholder="Add task..." required />
-  <input type="date" name="dueDate" />
+                        <form action="/delete/<%= todo._id %>?_method=DELETE" method="POST" class="action-form">
+                            <button type="submit" class="icon-btn delete">🗑️</button>
+                        </form>
+                    </div>
+                </li>
+                <% }) %>
+            </ul>
+        </section>
 
-  <select name="priority">
-    <option value="Low">Low</option>
-    <option value="Medium">Medium</option>
-    <option value="High">High</option>
-  </select>
+        <!-- Smart Pagination -->
+        <nav class="pagination glass floating" aria-label="Page navigation">
+            <% if (page > 1) { %>
+                <a href="/?page=<%= page - 1 %><%= req.query.filter ? `&filter=${req.query.filter}` : '' %>" 
+                   class="page-btn glass">
+                    ← Previous
+                </a>
+            <% } %>
+            
+            <span class="page-info glass">
+                Page <%= page %> of <%= totalPages %>
+            </span>
+            
+            <% if (page < totalPages) { %>
+                <a href="/?page=<%= page + 1 %><%= req.query.filter ? `&filter=${req.query.filter}` : '' %>" 
+                   class="page-btn glass">
+                    Next →
+                </a>
+            <% } %>
+        </nav>
+    </main>
 
-  <select name="category">
-    <option value="Work">Work</option>
-    <option value="Home">Home</option>
-    <option value="Important">Important</option>
-  </select>
-
-  <button type="submit">Add</button>
-</form>
-
-<!-- ✅ Todo List -->
-<ul class="todoList">
-  <% todos.forEach(todo => { %>
-  <li class="todo <%= todo.completed ? 'done' : '' %> <%= todo.priority.toLowerCase() %>">
-    <span>
-      <strong>Task:</strong> <%= todo.text %><br/>
-
-      <% if (todo.dueDate) { %>
-        <strong>Due:</strong> <%= new Date(todo.dueDate).toLocaleDateString() %><br/>
-      <% } %>
-
-      <strong>Priority:</strong> <%= todo.priority %><br/>
-      <strong>Category:</strong> <%= todo.category %><br/>
-
-      <strong>Status:</strong>
-      <%= todo.completed ? "✅ Completed" : "❌ Pending" %>
-
-      <% if (todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.completed) { %>
-        <span style="color:red;">⚠ Overdue</span>
-      <% } %>
-    </span>
-
-    <form action="/toggle/<%= todo._id %>?_method=PUT" method="POST" style="display:inline;">
-      <button type="submit">Toggle</button>
-    </form>
-
-    <form action="/delete/<%= todo._id %>?_method=DELETE" method="POST" style="display:inline;">
-      <button type="submit">Delete</button>
-    </form>
-
-    <form action="/update/<%= todo._id %>?_method=PUT" method="POST" style="display:inline;">
-      <input type="text" name="text" value="<%= todo.text %>" />
-      <button type="submit">Update</button>
-    </form>
-  </li>
-  <% }) %>
-</ul>
-
-<!-- ✅ Theme Toggle -->
-<script>
-document.querySelector("#themeSwitch").onclick = () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.classList.contains("dark"));
-};
-
-if (localStorage.getItem("theme") === "true") {
-  document.body.classList.add("dark");
-}
-</script>
+    <script src="/theme.js"></script>
+    <script src="/animations.js"></script>
+</body>
+</html>

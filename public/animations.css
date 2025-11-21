@@ -1,0 +1,179 @@
+/* 🌈 Base Animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 🎯 Todo Item Animations */
+.todo-item {
+    animation: fadeIn 0.3s ease-out;
+    transition: all 0.3s ease;
+}
+
+.todo-item.completed {
+    transform: translateX(5px);
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.todo-item.deleting {
+    opacity: 0;
+    transform: translateX(-100%);
+}
+
+.todo-item.new {
+    animation: slideUp 0.4s ease-out;
+}
+
+.todo-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 🌈 Background Animation */
+.animated-bg {
+    background: linear-gradient(-45deg, #ff8c00, #e52e71, #3f2b96, #00c6ff);
+    background-size: 400% 400%;
+    animation: bgAnimate 10s ease infinite;
+}
+
+@keyframes bgAnimate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 🧊 Glass Effect */
+.glass {
+    background: rgba(255,255,255,0.12);
+    border-radius: 18px;
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+
+.glass:hover {
+    box-shadow: 0 0 18px rgba(255,255,255,0.4);
+    transform: scale(1.02);
+}
+
+/* ☁️ Floating Animation */
+.floating {
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+/* 💧 Button Animations */
+.btn, .filter-option {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-option:hover {
+    transform: scale(1.05);
+}
+
+/* Ripple Effect */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple:hover::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.5);
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: rippleAnim 0.5s ease-out;
+}
+
+@keyframes rippleAnim {
+    to { 
+        transform: translate(-50%, -50%) scale(2); 
+        opacity: 0; 
+    }
+}
+
+/* ...existing code... */
+
+/* ⚡ Global Transitions */
+* {
+    transition: background-color 0.5s ease,
+                color 0.5s ease,
+                border-color 0.5s ease,
+                box-shadow 0.5s ease;
+}
+
+/* 🌙 Dark Mode Transitions */
+body {
+    transition: background 0.5s ease-in-out;
+}
+
+.dark-mode {
+    transition: all 0.5s ease-in-out;
+}
+
+.dark-mode .glass {
+    transition: background-color 0.5s ease,
+                backdrop-filter 0.5s ease,
+                box-shadow 0.5s ease;
+}
+
+.dark-mode .todo-item {
+    transition: background-color 0.5s ease,
+                color 0.5s ease,
+                transform 0.3s ease,
+                opacity 0.3s ease;
+}
+
+.dark-mode .btn,
+.dark-mode .filter-option {
+    transition: background-color 0.5s ease,
+                color 0.5s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+/* Smooth theme switch icon rotation */
+#themeSwitch {
+    transition: transform 0.5s ease;
+}
+
+.dark-mode #themeSwitch {
+    transform: rotate(360deg);
+}
